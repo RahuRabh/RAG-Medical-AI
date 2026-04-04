@@ -1,0 +1,8 @@
+.DS_Store
+cookies.txt
+backend/.env
+backend/dist
+backend/node_modules
+frontend/.env
+frontend/dist
+frontend/node_modules
