@@ -8,22 +8,31 @@ import { login, logout, refreshSession, register } from "../services/auth.servic
 
 const REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
-function setRefreshTokenCookie(res: Response, refreshToken: string) {
-  res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+function getRefreshCookieOptions() {
+  const isProduction = env.NODE_ENV === "production";
+  const sameSite: "lax" | "none" = isProduction ? "none" : "lax";
+
+  return {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite,
     maxAge: durationToMs(env.JWT_REFRESH_EXPIRES_IN),
     path: "/",
-  });
+  };
+}
+
+function setRefreshTokenCookie(res: Response, refreshToken: string) {
+  res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, getRefreshCookieOptions());
 }
 
 function clearRefreshTokenCookie(res: Response) {
+  const cookieOptions = getRefreshCookieOptions();
+
   res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
-    httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    httpOnly: cookieOptions.httpOnly,
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
+    path: cookieOptions.path,
   });
 }
 
