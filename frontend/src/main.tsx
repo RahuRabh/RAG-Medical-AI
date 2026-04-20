@@ -5,8 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 
 import { App } from "./app/App";
-import { AuthProvider } from "./features/auth/AuthProvider";
-import "./styles/global.css";
+// import { AuthProvider } from "./features/auth/AuthProvider";
 
 const queryClient = new QueryClient();
 
@@ -14,10 +13,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
+        {/* <AuthProvider> */}
           <App />
           <Toaster richColors position="top-right" />
-        </AuthProvider>
+        {/* </AuthProvider> */}
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,

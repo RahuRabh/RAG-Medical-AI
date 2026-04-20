@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "1.0.0",
   "private": true,
-  "description": "Task management frontend assessment",
+  "description": "AI Medical Research Assisstant",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

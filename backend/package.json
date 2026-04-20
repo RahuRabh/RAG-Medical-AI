@@ -1,12 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Task management backend assessment",
+  "description": "CuraLink medical research RAG assistant backend",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/src/server.js",
-    "build": "tsc -p tsconfig.json",
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "build": "node --check src/server.js",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -26,19 +26,14 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
+    "fast-xml-parser": "^5.7.1",
+    "groq-sdk": "^1.1.2",
     "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.4.1",
     "pg": "^8.20.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.5.0",
-    "prisma": "^7.6.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "prisma": "^7.6.0"
   }
 }

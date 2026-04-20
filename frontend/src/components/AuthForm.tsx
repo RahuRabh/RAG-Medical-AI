@@ -33,7 +33,7 @@ export function AuthForm({ title, subtitle, submitLabel, onSubmit, footer }: Aut
     <div className="auth-shell">
       <div className="auth-card">
         <div className="auth-copy">
-          <p className="eyebrow">Task Manager</p>
+          <p className="eyebrow">Medical Assistant</p>
           <h1>{title}</h1>
           <p>{subtitle}</p>
         </div>

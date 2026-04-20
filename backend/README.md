@@ -1,90 +1,67 @@
-# Task Manager Backend
+# CuraLink Backend
 
-Backend API for the task management assessment.
+Node.js + Express backend for the CuraLink AI Medical Research Assistant.
 
-## Tech stack
+## Tech Stack
 
-- Node.js
+- Node.js JavaScript ES modules
 - Express
-- TypeScript
-- Prisma ORM v7
-- PostgreSQL
-- JWT authentication
+- MongoDB Atlas with Mongoose for medical research conversations
+- Prisma ORM + PostgreSQL for authentication
+- JWT access token + refresh token auth flow
+- Zod request validation
 
 ## Features
 
 - User registration, login, refresh, and logout
-- Password hashing with bcrypt
-- Access token + refresh token authentication flow
-- User-scoped task CRUD
-- Task pagination, filtering by status, and title search
-- Request validation with Zod
+- MongoDB-backed research sessions and chat messages
+- Query understanding and query expansion
+- Retrieval from OpenAlex, PubMed, and ClinicalTrials.gov
+- Deduplication and deterministic ranking
+- Retrieval metadata returned to the frontend
 - Centralized error handling
 
-## Project structure
+## Project Structure
 
 ```text
 src/
   config/
   controllers/
   middlewares/
+  models/
   routes/
   services/
-  types/
+    chat/
+    query/
+    ranking/
+    retrieval/
   utils/
 prisma/
   migrations/
   schema.prisma
 ```
 
-## Environment variables
+## Environment Variables
 
 Create a `.env` file in `backend/` using `.env.example`.
 
-Required values:
-
 ```env
 NODE_ENV=development
-PORT=5000
+PORT=5001
 CLIENT_URL=http://localhost:5173
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/task_manager?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/curalink?schema=public"
+MONGO_URI="mongodb+srv://<user>:<password>@<cluster>/medical_research_assistant?retryWrites=true&w=majority"
 JWT_ACCESS_SECRET=replace-with-a-long-random-string
 JWT_REFRESH_SECRET=replace-with-a-different-long-random-string
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 ```
 
-## Install dependencies
+## Run Locally
 
 ```bash
 npm install
-```
-
-## Prisma setup
-
-Generate the Prisma client:
-
-```bash
 npm run prisma:generate
-```
-
-Apply the migration to your local database:
-
-```bash
-npm run prisma:deploy
-```
-
-If you prefer creating migrations locally during development:
-
-```bash
-npm run prisma:migrate -- --name init
-```
-
-## Run the backend
-
-Development:
-
-```bash
 npm run dev
 ```
 
@@ -95,32 +72,30 @@ npm run build
 npm run start
 ```
 
-## API endpoints
+## API Endpoints
 
-### Auth
+Auth:
 
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `POST /auth/logout`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
 
-### Tasks
+Research assistant:
 
-- `GET /tasks`
-- `POST /tasks`
-- `GET /tasks/:id`
-- `PATCH /tasks/:id`
-- `DELETE /tasks/:id`
-- `PATCH /tasks/:id/toggle`
+- `POST /api/chat`
+- `GET /api/chat/sessions`
+- `GET /api/chat/sessions/:id`
 
-## Example task query params
+Health:
 
-```text
-GET /tasks?page=1&limit=10&status=PENDING&search=report
-```
+- `GET /api/health`
+- `GET /api/health/db`
 
-## Notes
+## Retrieval Sources
 
-- Refresh token is stored in an `httpOnly` cookie.
-- Protected task routes require `Authorization: Bearer <access-token>`.
-- All task operations are restricted to the authenticated user.
+- OpenAlex: publications
+- PubMed E-utilities: publications
+- ClinicalTrials.gov API v2: clinical trials
+
+The backend fetches a broad candidate pool, deduplicates sources, ranks them by relevance, recency, credibility, completeness, and context fit, then returns the top ranked sources with retrieval stats.
