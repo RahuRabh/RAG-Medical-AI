@@ -7,7 +7,6 @@ Node.js + Express backend for the CuraLink AI Medical Research Assistant.
 - Node.js JavaScript ES modules
 - Express
 - MongoDB Atlas with Mongoose for medical research conversations
-- Prisma ORM + PostgreSQL for authentication
 - JWT access token + refresh token auth flow
 - Zod request validation
 
@@ -36,9 +35,6 @@ src/
     ranking/
     retrieval/
   utils/
-prisma/
-  migrations/
-  schema.prisma
 ```
 
 ## Environment Variables
@@ -49,19 +45,13 @@ Create a `.env` file in `backend/` using `.env.example`.
 NODE_ENV=development
 PORT=5001
 CLIENT_URL=http://localhost:5173
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/curalink?schema=public"
 MONGO_URI="mongodb+srv://<user>:<password>@<cluster>/medical_research_assistant?retryWrites=true&w=majority"
-JWT_ACCESS_SECRET=replace-with-a-long-random-string
-JWT_REFRESH_SECRET=replace-with-a-different-long-random-string
-JWT_ACCESS_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
 ```
 
 ## Run Locally
 
 ```bash
 npm install
-npm run prisma:generate
 npm run dev
 ```
 
