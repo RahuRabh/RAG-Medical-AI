@@ -4,7 +4,7 @@ import { connectMongo } from "./config/mongo.js";
 
 async function bootstrap() {
   await connectMongo();
-
+  console.log("CLIENT_URL =", process.env.CLIENT_URL);
   const app = createApp();
 
   app.listen(env.PORT, () => {

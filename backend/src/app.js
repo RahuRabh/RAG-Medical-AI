@@ -5,9 +5,7 @@ import express from "express";
 import { env } from "./config/env.js";
 import { apiRouter } from "./routes/index.js";
 
-const allowedOrigins = new Set([
-  env.CLIENT_URL,
-]);
+const allowedOrigins = new Set([env.CLIENT_URL]);
 
 function isAllowedOrigin(origin) {
   return (
@@ -20,25 +18,32 @@ function isAllowedOrigin(origin) {
 export function createApp() {
   const app = express();
 
+  // app.use(
+  //   cors({
+  //   origin(origin, callback) {
+  //     if (!origin || isAllowedOrigin(origin)) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error("Not allowed by CORS"));
+  //     }
+  //   },
+  //   credentials: true,
+  // }),
+  // );
   app.use(
     cors({
-      origin(origin, callback) {
-        if (!origin || isAllowedOrigin(origin)) {
-          callback(null, true);
-          return;
-        }
-
-        callback(new Error(`Origin ${origin} is not allowed by CORS`));
-      },
+      origin: true,
       credentials: true,
     }),
   );
   app.use(express.json());
   app.use(cookieParser());
 
+  app.get("/test", (_req, res) => {
+  res.send("working");
+});
   app.use("/api", apiRouter);
-  app.use(apiRouter);
-
+  // app.use(apiRouter);
 
   return app;
 }
