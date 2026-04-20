@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { getChatSession, getChatSessions, sendChatMessage } from "../api/chat";
@@ -19,12 +19,12 @@ const emptyContext: StructuredContext = {
   location: "",
 };
 
-const exampleContext: StructuredContext = {
-  patientName: "John Smith",
-  disease: "Parkinson's disease",
-  intent: "Deep Brain Stimulation",
-  location: "Toronto, Canada",
-};
+// const exampleContext: StructuredContext = {
+//   patientName: "John Smith",
+//   disease: "Parkinson's disease",
+//   intent: "Deep Brain Stimulation",
+//   location: "Toronto, Canada",
+// };
 
 function makeId() {
   return crypto.randomUUID();
@@ -51,31 +51,31 @@ export function ResearchAssistantPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [error, setError] = useState("");
 
-  const latestAssistant = useMemo(
-    () => [...messages].reverse().find((item) => item.role === "assistant"),
-    [messages],
-  );
+  // const latestAssistant = useMemo(
+  //   () => [...messages].reverse().find((item) => item.role === "assistant"),
+  //   [messages],
+  // );
 
-  const latestSources =
-    latestAssistant?.role === "assistant" ? latestAssistant.sources : [];
-  const latestMetadata =
-    latestAssistant?.role === "assistant"
-      ? latestAssistant.metadata
-      : undefined;
-  const publications = latestSources
-    .filter(
-      (source) =>
-        source.type === "publication" ||
-        source.platform !== "ClinicalTrials.gov",
-    )
-    .slice(0, 5);
-  const trials = latestSources
-    .filter(
-      (source) =>
-        source.type === "clinical_trial" ||
-        source.platform === "ClinicalTrials.gov",
-    )
-    .slice(0, 5);
+  // const latestSources =
+  //   latestAssistant?.role === "assistant" ? latestAssistant.sources : [];
+  // const latestMetadata =
+  //   latestAssistant?.role === "assistant"
+  //     ? latestAssistant.metadata
+  //     : undefined;
+  // const publications = latestSources
+  //   .filter(
+  //     (source) =>
+  //       source.type === "publication" ||
+  //       source.platform !== "ClinicalTrials.gov",
+  //   )
+  //   .slice(0, 5);
+  // const trials = latestSources
+  //   .filter(
+  //     (source) =>
+  //       source.type === "clinical_trial" ||
+  //       source.platform === "ClinicalTrials.gov",
+  //   )
+  //   .slice(0, 5);
 
   async function refreshSessions() {
     try {
@@ -97,10 +97,10 @@ export function ResearchAssistantPage() {
     }));
   }
 
-  function loadExample() {
-    setStructuredContext(exampleContext);
-    setMessage("What does the research say about this treatment?");
-  }
+  // function loadExample() {
+  //   setStructuredContext(exampleContext);
+  //   setMessage("What does the research say about this treatment?");
+  // }
 
   function startNewConversation() {
     setConversationId(null);
