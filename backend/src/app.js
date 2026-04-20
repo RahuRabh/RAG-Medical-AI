@@ -3,8 +3,6 @@ import cors from "cors";
 import express from "express";
 
 import { env } from "./config/env.js";
-import { errorMiddleware } from "./middlewares/error.middleware.js";
-import { notFoundMiddleware } from "./middlewares/not-found.middleware.js";
 import { apiRouter } from "./routes/index.js";
 
 const allowedOrigins = new Set([
@@ -41,8 +39,6 @@ export function createApp() {
   app.use("/api", apiRouter);
   app.use(apiRouter);
 
-  app.use(notFoundMiddleware);
-  app.use(errorMiddleware);
 
   return app;
 }
