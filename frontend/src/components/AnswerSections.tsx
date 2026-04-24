@@ -55,7 +55,7 @@ export function AnswerSections({
                 Source publications ({publications.length})
               </p>
               <div className="source-card-grid">
-                {publications.map((source, index) => (
+                {publications?.map((source, index) => (
                   <SourceCard
                     key={`${source.platform}-${source.title}`}
                     source={source}

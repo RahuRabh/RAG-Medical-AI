@@ -9,7 +9,9 @@ import { rankSources } from "../ranking/ranking.service.js";
 import { retrieveSources } from "../retrieval/retrieval.service.js";
 import { buildMedicalPrompt } from "../llm/prompt-builder.service.js";
 import { generateGroqMedicalAnswer } from "../llm/groq.service.js";
-import { parserMedicalAnswer } from "../llm/response-parser.service.js"
+import { parserMedicalAnswer } from "../llm/response-parser.service.js";
+import { addSemanticScores } from "./semantic/semantic-rerank.service.js";
+import { debugLog } from "../../utils/debug.js";
 
 function getContextValue(nextValue, fallback = "") {
   return nextValue?.trim() || fallback;
@@ -62,7 +64,7 @@ export async function handleMockChat(input) {
     input.conversationId,
     structuredContext,
   );
-  const understoodQuery = understandQuery({
+  const understoodQuery = await understandQuery({
     message: input.message,
     structuredContext,
     conversationContext: {
@@ -72,7 +74,8 @@ export async function handleMockChat(input) {
       activeLocation: conversation.activeLocation,
     },
   });
-  const expandedQuery = expandQuery(understoodQuery);
+
+  const expandedQuery = await expandQuery(understoodQuery);
 
   conversation.patientName = understoodQuery.patientName;
   conversation.activeDisease = understoodQuery.disease;
@@ -99,8 +102,16 @@ export async function handleMockChat(input) {
     expandedQuery,
     understoodQuery,
   });
+
+  //v2
+  const candidatesWithSemantic = await addSemanticScores(
+    retrieval.candidates,
+    understoodQuery,
+  );
+
   const ranking = rankSources({
-    candidates: retrieval.candidates,
+    // candidates: retrieval.candidates, v1
+    candidates: candidatesWithSemantic,
     understoodQuery,
   });
 
@@ -117,8 +128,6 @@ export async function handleMockChat(input) {
 
     answer = parserMedicalAnswer(rawAnswer, ranking.topSources);
   } catch (error) {
-    console.error("LLM generation failed", error);
-
     answer = {
       conditionOverview:
         "The language model is temporarily unavailable. Showing the strongest ranked evidence instead.",

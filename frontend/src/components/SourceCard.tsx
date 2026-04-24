@@ -36,9 +36,14 @@ export function SourceCard({ source }: SourceCardProps) {
 
       <div className="source-card-footer">
         <span className="source-score">
-          {source.scores
-            ? `Score ${source.scores.final.toFixed(2)}`
-            : "Relevant"}
+          {source.scores ? (
+  <span>
+    Score{" "}
+    {Number.isFinite(source.scores.final)
+      ? source.scores.final.toFixed(2)
+      : "0.00"}
+  </span>
+) : null}
         </span>
 
         <a

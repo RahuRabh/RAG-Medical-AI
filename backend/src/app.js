@@ -18,23 +18,17 @@ function isAllowedOrigin(origin) {
 export function createApp() {
   const app = express();
 
-  // app.use(
-  //   cors({
-  //   origin(origin, callback) {
-  //     if (!origin || isAllowedOrigin(origin)) {
-  //       callback(null, true);
-  //     } else {
-  //       callback(new Error("Not allowed by CORS"));
-  //     }
-  //   },
-  //   credentials: true,
-  // }),
-  // );
   app.use(
     cors({
-      origin: true,
-      credentials: true,
-    }),
+    origin(origin, callback) {
+      if (!origin || isAllowedOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
   );
   app.use(express.json());
   app.use(cookieParser());
@@ -43,7 +37,6 @@ export function createApp() {
   res.send("working");
 });
   app.use("/api", apiRouter);
-  // app.use(apiRouter);
 
   return app;
 }

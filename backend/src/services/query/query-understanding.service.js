@@ -1,3 +1,6 @@
+import { getEmbedding } from "../chat/semantic/embedding.service.js";
+import { cosineSimilarity } from "../chat/semantic/similarity.service.js";
+
 const followUpPatterns = [
   /^what about\b/i,
   /^can i\b/i,
@@ -16,7 +19,7 @@ function clean(value) {
   return value?.trim() ?? "";
 }
 
-export function understandQuery({
+export async function understandQuery({
   message,
   structuredContext,
   conversationContext,
@@ -26,8 +29,31 @@ export function understandQuery({
   const structuredIntent = clean(structuredContext?.intent);
   const structuredLocation = clean(structuredContext?.location);
   const hasFreshStructuredContext = Boolean(structuredDisease || structuredIntent);
-  const isFollowUp =
-    !hasFreshStructuredContext && followUpPatterns.some((pattern) => pattern.test(originalMessage));
+  // const isFollowUp =
+  //   !hasFreshStructuredContext && followUpPatterns.some((pattern) => pattern.test(originalMessage));
+
+  let isFollowUp =
+  !hasFreshStructuredContext &&
+  followUpPatterns.some((pattern) => pattern.test(originalMessage));
+
+// Semantic fallback
+if (!isFollowUp && conversationContext?.activeIntent) {
+  try {
+    const currentEmbedding = await getEmbedding(originalMessage);
+    const previousEmbedding = await getEmbedding(
+      `${conversationContext.activeIntent} ${conversationContext.activeDisease}`
+    );
+
+    const similarity = cosineSimilarity(currentEmbedding, previousEmbedding);
+
+    if (similarity > 0.45) {
+      isFollowUp = true;
+    }
+  } catch (e) {
+    console.log("Embedding could not complete", e);
+    
+  }
+}
 
   const disease =
     structuredDisease || (isFollowUp ? clean(conversationContext?.activeDisease) : "") || clean(conversationContext?.activeDisease);

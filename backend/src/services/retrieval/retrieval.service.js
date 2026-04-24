@@ -60,14 +60,14 @@ export async function retrieveSources({
   understoodQuery,
 }) {
   const [openAlexResult, pubMedResult, clinicalTrialsResult] = await Promise.all([
-    settleSource("OpenAlex", fetchOpenAlexSources(expandedQuery.publicationQueries, 50)),
-    settleSource("PubMed", fetchPubMedSources(expandedQuery.publicationQueries, 50)),
+    settleSource("OpenAlex", fetchOpenAlexSources(expandedQuery.publicationQueries, 100)),
+    settleSource("PubMed", fetchPubMedSources(expandedQuery.publicationQueries, 100)),
     settleSource(
       "ClinicalTrials.gov",
       fetchClinicalTrialSources({
         disease: understoodQuery.disease,
         queries: expandedQuery.clinicalTrialQueries,
-        limit: 25,
+        limit: 50,
       }),
     ),
   ]);

@@ -1,3 +1,4 @@
+import { debugLog } from "../../utils/debug.js";
 import { termMatchScore, tokenize } from "./text-scoring.js";
 
 const currentYear = new Date().getFullYear();
@@ -27,18 +28,24 @@ function scoreRecency(year) {
 
 // Source trust is weighted 15%
 function scoreCredibility(source) {
-  if (source.platform === "PubMed" || source.platform === "ClinicalTrials.gov") {
+  if (
+    source.platform === "PubMed" ||
+    source.platform === "ClinicalTrials.gov"
+  ) {
     return 1;
   }
 
   if (source.platform === "OpenAlex") {
-    return source.url.includes("doi.org") || source.url.startsWith("https://doi.org") ? 0.86 : 0.72;
+    return source.url.includes("doi.org") ||
+      source.url.startsWith("https://doi.org")
+      ? 0.86
+      : 0.72;
   }
 
   return 0.5;
 }
 
-// Completeness if paper ha title, abstract, authors, year, URL 10%
+// Completeness if paper has title, abstract, authors, year, URL 10%
 function scoreCompleteness(source) {
   const checks = [
     Boolean(source.title),
@@ -59,13 +66,18 @@ function scoreContextBonus(source, query) {
   if (source.type === "clinical_trial") {
     const status = source.trial?.status?.toLowerCase() ?? "";
 
-    if (["recruiting", "active", "not yet recruiting"].some((value) => status.includes(value))) {
+    if (
+      ["recruiting", "active", "not yet recruiting"].some((value) =>
+        status.includes(value),
+      )
+    ) {
       score += 0.5;
       reasons.push("Active or recruiting trial status");
     }
 
     if (query.location) {
-      const locationText = source.trial?.locations?.join(" ").toLowerCase() ?? "";
+      const locationText =
+        source.trial?.locations?.join(" ").toLowerCase() ?? "";
       const locationTokens = tokenize(query.location);
 
       if (locationTokens.some((token) => locationText.includes(token))) {
@@ -86,7 +98,11 @@ function scoreRelevance(source, query) {
   const intentTerms = tokenize(query.intent || query.originalMessage);
   const terms = [...diseaseTerms, ...intentTerms];
   const titleScore = termMatchScore(source.title, terms, 1.4);
-  const abstractScore = termMatchScore(`${source.abstract} ${source.supportingSnippet}`, terms, 1);
+  const abstractScore = termMatchScore(
+    `${source.abstract} ${source.supportingSnippet}`,
+    terms,
+    1,
+  );
   const trialScore = source.trial
     ? termMatchScore(
         [
@@ -99,7 +115,10 @@ function scoreRelevance(source, query) {
       )
     : 0;
 
-  return Math.min(1, titleScore * 0.55 + abstractScore * 0.35 + trialScore * 0.1);
+  return Math.min(
+    1,
+    titleScore * 0.55 + abstractScore * 0.35 + trialScore * 0.1,
+  );
 }
 
 // creates a structured response for frontend
@@ -121,7 +140,10 @@ function buildRankingReasons(source, query, contextReasons) {
     reasons.push("Recent source");
   }
 
-  if (source.platform === "PubMed" || source.platform === "ClinicalTrials.gov") {
+  if (
+    source.platform === "PubMed" ||
+    source.platform === "ClinicalTrials.gov"
+  ) {
     reasons.push(`${source.platform} source`);
   }
 
@@ -130,11 +152,40 @@ function buildRankingReasons(source, query, contextReasons) {
   return reasons.slice(0, 4);
 }
 
+// concept gives better ranking
+function scoreConceptMatch(source, queryTerms) {
+  if (!source.concepts) return 0;
+
+  const conceptText = source.concepts
+    .map((c) => c.display_name.toLowerCase())
+    .join(" ");
+
+  let score = 0;
+
+  queryTerms.forEach((term) => {
+    if (conceptText.includes(term)) {
+      score += 0.1;
+    }
+  });
+
+  return Math.min(score, 0.3);
+}
+
 export function rankSources({
   candidates,
   understoodQuery,
   selectedLimit = 8,
 }) {
+  const queryTerms = [
+    understoodQuery.intent,
+    understoodQuery.disease,
+    understoodQuery.originalMessage,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+    .split(/\s+/);
+
   const rankedSources = candidates
     .map((source) => {
       const relevance = scoreRelevance(source, understoodQuery);
@@ -142,43 +193,79 @@ export function rankSources({
       const credibility = scoreCredibility(source);
       const completeness = scoreCompleteness(source);
       const contextBonus = scoreContextBonus(source, understoodQuery);
+      // v1
+      // const final =
+      //   relevance * 0.5 +
+      //   recency * 0.15 +
+      //   credibility * 0.15 +
+      //   completeness * 0.1 +
+      //   contextBonus.score * 0.1;
+      //v2
+      const semanticScore =
+        typeof source.semanticScore === "number" &&
+        !Number.isNaN(source.semanticScore)
+          ? source.semanticScore
+          : 0;
+      const conceptScore = scoreConceptMatch(source, queryTerms);
       const final =
-        relevance * 0.5 +
+        relevance * 0.3 +
+        semanticScore * 0.3 +
         recency * 0.15 +
         credibility * 0.15 +
-        completeness * 0.1 +
-        contextBonus.score * 0.1;
+        completeness * 0.05 +
+        conceptScore * 0.1;
 
       return {
         ...source,
         scores: {
           relevance,
+          semantic: semanticScore,
+          concept: conceptScore,
           recency,
           credibility,
           completeness,
           contextBonus: contextBonus.score,
           final,
         },
-        rankingReason: buildRankingReasons(source, understoodQuery, contextBonus.reasons),
+        rankingReason: buildRankingReasons(
+          source,
+          understoodQuery,
+          contextBonus.reasons,
+        ),
       };
     })
-    .sort((left, right) => (right.scores?.final ?? 0) - (left.scores?.final ?? 0));
+    .sort(
+      (left, right) => (right.scores?.final ?? 0) - (left.scores?.final ?? 0),
+    );
 
   const selectedPublications = rankedSources
     .filter((source) => source.type === "publication")
-    .slice(0, 5);
+    .slice(0, 10);
   const selectedTrials = rankedSources
     .filter((source) => source.type === "clinical_trial")
-    .slice(0, 3);
+    .slice(0, 5);
   const topSources = [...selectedPublications, ...selectedTrials]
-    .sort((left, right) => (right.scores?.final ?? 0) - (left.scores?.final ?? 0))
+    .sort(
+      (left, right) => (right.scores?.final ?? 0) - (left.scores?.final ?? 0),
+    )
     .slice(0, selectedLimit);
-
   const rankingStats = {
     rankedCount: rankedSources.length,
     selectedCount: topSources.length,
     highestScore: Number((rankedSources[0]?.scores?.final ?? 0).toFixed(3)),
   };
+
+  // temporarily
+  console.log("\nTOP RESULTS:");
+  rankedSources.slice(0, 5).forEach((s, i) => {
+    console.log({
+      rank: i + 1,
+      title: s.title,
+      relevance: s.scores.relevance,
+      semantic: s.scores.semantic,
+      final: s.scores.final,
+    });
+  });
 
   return {
     rankedSources,
