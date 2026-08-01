@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import React, { useState } from "react";
 
 import { useAuth } from "@/features/auth/context/useAuth";
