@@ -28,7 +28,6 @@ export function Security() {
         currentPassword: currentPassword,
         newPassword: newPassword,
       });
-      toast.success("Password updated");
       closeView();
     } catch (err: any) {
       setError(

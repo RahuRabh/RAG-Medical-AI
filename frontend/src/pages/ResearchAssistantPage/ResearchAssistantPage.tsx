@@ -42,11 +42,7 @@ export function ResearchAssistantPage() {
   const [message, setMessage] = useState("");
 
   const handleOpenSession = async (id: string) => {
-    try {
-      await openSession(id);
-    } catch {
-      toast.error("Failed to load historical session details");
-    }
+    await openSession(id);
   };
 
   const executeSearchFlow = async (queryText: string) => {
@@ -57,9 +53,7 @@ export function ResearchAssistantPage() {
 
     const trimmed = queryText.trim();
     if (!trimmed) {
-      toast.warning(
-        "Please type a message query or select a patient intent input",
-      );
+      toast.warning("Please type a message query or select a patient intent input");
       return;
     }
 
@@ -67,7 +61,6 @@ export function ResearchAssistantPage() {
       setMessage("");
       await sendMessage(trimmed);
     } catch {
-      toast.error("Unable to compile medical assistant response");
       setMessage(trimmed);
     }
   };
@@ -184,7 +177,6 @@ export function ResearchAssistantPage() {
 
             {/* If loading show loading messages */}
             {isLoading && <LoadingPipeline />}
-            
           </div>
 
           <QuestionForm

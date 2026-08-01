@@ -300,6 +300,10 @@ export async function renameChatSessions(conversationId, userId, newTitle) {
     {
       $set: { title: trimmedTitle },
     },
+    {
+      returnDocument: "after",
+      timestamps: false,
+    },
     { returnDocument: 'after' }
   ).lean();
 

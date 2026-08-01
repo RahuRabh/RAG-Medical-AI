@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useAuth } from "../../auth/context/useAuth";
 import { createContext, useState, useEffect, ReactNode } from "react";
 
@@ -32,7 +33,14 @@ export type ChatContextType = {
   openSession: (sessionId: string) => Promise<void>;
   sendMessage: (textContent: string) => Promise<void>;
   deleteConversation: (messageId: string | null) => Promise<void>;
+<<<<<<< HEAD
   updateConversation: (conversationId: string | null, newTitle: string | null) => Promise<void>;
+=======
+  updateConversation: (
+    conversationId: string | null,
+    newTitle: string | null,
+  ) => Promise<void>;
+>>>>>>> 593570a (Fix: Update, Delete of conv, refactored code)
 };
 
 export const ChatContext = createContext<ChatContextType | null>(null);
@@ -108,6 +116,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setMessages(mapStoredMessagesToChatMessages(session.messages));
     } catch (sessionError) {
       console.error(sessionError);
+      toast.error("Failed to load historical session details");
       setError("Could not retrieve session details.");
       throw sessionError;
     } finally {
@@ -150,6 +159,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       await refreshSessions();
     } catch (requestError) {
       console.error(requestError);
+      toast.error(
+        "The assistant could not respond. Please verify your connection setup.",
+      );
       setError(
         "The assistant could not respond. Please verify your connection setup.",
       );
@@ -160,18 +172,39 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteConversation = async (messageId: typeof conversationId) => {
+<<<<<<< HEAD
     setIsLoading(true);
+=======
+    if (!messageId) return;
+>>>>>>> 593570a (Fix: Update, Delete of conv, refactored code)
     setError("");
     try {
       await deleteConversationById(messageId);
       setMessages((current) => current.filter((msg) => msg.id !== messageId));
-      await refreshSessions();
       if (messageId === conversationId) resetChatState();
+      await refreshSessions();
+      toast.success("Conversation Deleted");
     } catch (requestError) {
-      console.error("Failed to delete message", requestError);
-      setError("Could not delete the message. Please try again.");
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to delete conversation", requestError);
+      toast.error("Could not delete the conversation. Please try again.");
+      setError("Could not delete the conversation. Please try again.");
+    }
+  };
+
+  const updateConversation = async (
+    conversationId: string | null,
+    newTitle: string | null,
+  ) => {
+    if (!conversationId || !newTitle) return;
+    setError("");
+    try {
+      await UpdateConversationById(conversationId, newTitle);
+      await refreshSessions();
+      toast.success("Conversation renamed");
+    } catch (requestError) {
+      console.error("Failed to rename conversation", requestError);
+      toast.error("Could not rename the conversation. Please try again.");
+      setError("Could not rename the conversation. Please try again.");
     }
   };
 

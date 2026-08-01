@@ -46,11 +46,10 @@ export function Profile() {
     setError("");
 
     try {
-      const res = await updateProfile({
+      await updateProfile({
         name: name,
         imageFile: imageFile,
       });
-      toast.success(res?.message || "Profile Updated");
       closeView();
     } catch (err: any) {
       setError(

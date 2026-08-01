@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import { useState } from "react";
 
 import { useAuth } from "@/features/auth/context/useAuth";
@@ -27,10 +26,8 @@ export function GoogleLoginButton({ onClose }: GoogleLoginButtonProps) {
 
       await loginWithGoogle(idToken);
 
-      toast.success("Logged in with Google.");
       onClose();
-    } catch (error) {
-      console.error("Google Auth Error:", error);
+    } catch (error: any) {
       setGoogleError("Google login failed. Please try again.");
     } finally {
       setIsPending(false);

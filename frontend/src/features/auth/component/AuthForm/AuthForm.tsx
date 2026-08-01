@@ -39,24 +39,20 @@ export function AuthForm({ onSuccess, mode, setMode }: AuthFormProps) {
 
     try {
       if (mode === "register") {
-        const res = await register(name, email, password);
-        toast.success(res?.message || "Registered successfully");
+        await register(name, email, password);
         onSuccess();
       } else if (mode === "login") {
-        const res = await login(email, password);
-        toast.success(res?.message || "Logged in successfully.");
+        await login(email, password);
         onSuccess();
       } else if (mode === "forgot") {
-        const res = await sendOtpRequest(email);
-        toast.success(res?.message || "OTP sent successfully.");
+        await sendOtpRequest(email);
         setMode("verify");
       } else if (mode === "verify") {
-        const res = await verifyOtpRequest({
+        await verifyOtpRequest({
           email,
           otp,
           newPassword: password,
         });
-        toast.success(res?.message || "Password updated successfully");
         setMode("login");
         setPassword("");
         setOtp("");

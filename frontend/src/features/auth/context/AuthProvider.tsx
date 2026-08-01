@@ -1,7 +1,8 @@
+import { toast } from "sonner";
 import type { ReactNode } from "react";
 import { createContext, useEffect, useMemo, useState } from "react";
 
-import type { AuthResponse, user as User } from "@/types/auth"
+import type { AuthResponse, user as User } from "@/types/auth";
 
 import {
   googleAuth,
@@ -11,7 +12,7 @@ import {
   registerRequest,
   UpdatePasswordPayload,
   updatePasswordRequest,
-} from "@/api/auth"
+} from "@/api/auth";
 
 import {
   clearStoredUser,
@@ -20,9 +21,9 @@ import {
   getStoredToken,
   setStoredToken,
   clearStoredToken,
-} from "@/lib/storage"
+} from "@/lib/storage";
 
-import { UpdateProfilePayload, updateProfileRequest } from "@/api/profile"
+import { UpdateProfilePayload, updateProfileRequest } from "@/api/profile";
 
 type AuthContextValue = {
   token: string | null;
@@ -93,54 +94,112 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isBootstrapping,
       isAuthModalOpen,
       async login(email, password) {
-        const response = await loginRequest({ email, password });
+        try {
+          const response = await loginRequest({ email, password });
 
-        setToken(response.token);
-        setUser(response.user);
-        setStoredToken(response.token);
-        setStoredUser(response.user);
+          setToken(response.token);
+          setUser(response.user);
+          setStoredToken(response.token);
+          setStoredUser(response.user);
+          toast.success(response?.message || "Logged in successfully.");
 
-        return response;
+          return response;
+        } catch (error: any) {
+          if (import.meta.env.VITE_ENV === "development") {
+            console.error("Login failed", error);
+          }
+          toast.error(
+            error?.response?.data?.error ||
+              "Something went wrong here. please try again!",
+          );
+          throw error;
+        }
       },
 
       async loginWithGoogle(tokenId) {
-        const response = await googleAuth(tokenId);
+        try {
+          const response = await googleAuth(tokenId);
 
-        setToken(response.token);
-        setUser(response.user);
-        setStoredToken(response.token);
-        setStoredUser(response.user);
+          setToken(response.token);
+          setUser(response.user);
+          setStoredToken(response.token);
+          setStoredUser(response.user);
+          toast.success(response?.message || "Logged in successfully.");
 
-        return response;
+          return response;
+        } catch (error: any) {
+          if (import.meta.env.VITE_ENV === "development") {
+            console.error("Google login failed", error);
+          }
+          toast.error(
+            error?.response?.data?.error ||
+              "Something went wrong here. please try again!",
+          );
+          throw error;
+        }
       },
 
       async register(name, email, password) {
-        const response = await registerRequest({ name, email, password });
+        try {
+          const response = await registerRequest({ name, email, password });
 
-        setToken(response.token);
-        setUser(response.user);
-        setStoredToken(response.token);
-        setStoredUser(response.user);
-
-        return response;
+          setToken(response.token);
+          setUser(response.user);
+          setStoredToken(response.token);
+          setStoredUser(response.user);
+          toast.success(response?.message || "Registed successfully.");
+          return response;
+        } catch (error: any) {
+          if (import.meta.env.VITE_ENV === "development") {
+            console.error("Registration failed", error);
+          }
+          toast.error(
+            error?.response?.data?.error ||
+              "Something went wrong here. please try again!",
+          );
+          throw error;
+        }
       },
 
       async updateProfile(payload: UpdateProfilePayload) {
-        const response = await updateProfileRequest(payload);
+        try {
+          const response = await updateProfileRequest(payload);
 
-        setUser(response.user);
-        setStoredUser(response.user);
-
-        return response;
+          setUser(response.user);
+          setStoredUser(response.user);
+          toast.success(response?.message || "Profile updated successfully.");
+          return response;
+        } catch (error: any) {
+          if (import.meta.env.VITE_ENV === "development") {
+            console.error("Profile update failed", error);
+          }
+          toast.error(
+            error?.response?.data?.error ||
+              "Something went wrong here. please try again!",
+          );
+          throw error;
+        }
       },
 
       async updatePassword(payload: UpdatePasswordPayload) {
-        const response = await updatePasswordRequest(payload);
+        try {
+          const response = await updatePasswordRequest(payload);
 
-        setToken(response.token);
-        setStoredUser(response.token);
+          setToken(response.token);
+          setStoredUser(response.token);
 
-        return response;
+          toast.success(response?.message || "Password updated successfully.");
+          return response;
+        } catch (error: any) {
+          if (import.meta.env.VITE_ENV === "development") {
+            console.error("Password update failed", error);
+          }
+          toast.error(
+            error?.response?.data?.error ||
+              "Something went wrong here. please try again!",
+          );
+          throw error;
+        }
       },
 
       async logout() {
@@ -156,9 +215,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
 
-      openAuthModal : () => setIsAuthModalOpen(true),
-      closeAuthModal : () => setIsAuthModalOpen(false),
-
+      openAuthModal: () => setIsAuthModalOpen(true),
+      closeAuthModal: () => setIsAuthModalOpen(false),
     }),
     [token, isBootstrapping, user, isAuthModalOpen],
   );
