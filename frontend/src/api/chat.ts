@@ -42,7 +42,7 @@ export async function getChatSession(sessionId: string) {
 
 export async function deleteConversationById(conversationId: string | null) {
   const response = await api.delete(
-    `/chat/deleteConversation/${conversationId}`,
+    `/chat/delete-conversation/${conversationId}`,
   );
 
   return response.data;
@@ -52,7 +52,7 @@ export async function UpdateConversationById(
   conversationId: string | null,
   newTitle: string | null,
 ) {
-  const response = await api.put(`/chat/updateConversation/${conversationId}`, {
+  const response = await api.put(`/chat/update-conversation/${conversationId}`, {
     newTitle: newTitle?.trim(),
   });
 

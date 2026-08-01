@@ -14,6 +14,6 @@ chatRouter.use(authMiddleware);
 
 chatRouter.get("/sessions", getChatSessions);
 chatRouter.get("/sessions/:id", getChatSessionById);
-chatRouter.delete("/deleteConversation/:conversationId", deleteSessionById);
-chatRouter.put("/updateConversation/:conversationId", updateSessionById);
+chatRouter.delete("/delete-conversation/:conversationId", deleteSessionById);
+chatRouter.put("/update-conversation/:conversationId", updateSessionById);
 chatRouter.post("/", createChatTurn);
