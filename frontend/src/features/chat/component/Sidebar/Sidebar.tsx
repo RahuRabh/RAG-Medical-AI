@@ -13,7 +13,6 @@ import { SessionListItem } from "@/components/ui/SessionList/SessionListItem";
 import { getInitials } from "@/utils/genInitials";
 
 import styles from "./Sidebar.module.css";
-import { toast } from "sonner";
 
 type SidebarProps = {
   sessions: ChatSessionSummary[];
@@ -32,11 +31,7 @@ export function Sidebar({
   onNewConversation,
   onOpenSession,
 }: SidebarProps) {
-<<<<<<< HEAD
-  const { deleteConversation, updateConversation } = useChat();
-=======
   const { deleteConversation, updateConversation, isLoading } = useChat();
->>>>>>> 593570a (Fix: Update, Delete of conv, refactored code)
   const { isAuthenticated, user, openAuthModal } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -100,21 +95,11 @@ export function Sidebar({
                   if (
                     window.confirm("Are you sure you want to delete this chat?")
                   ) {
-<<<<<<< HEAD
-                    await deleteConversation(conversationId);
-                    toast.success("Conversation Deleted");
-                  }
-                }}
-                onRename={async (newTitle) => {
-                  await updateConversation(conversationId, newTitle)
-                  toast.success("Title renamed");
-=======
                     await deleteConversation(session.id);
                   }
                 }}
                 onRename={async (newTitle) => {
                   await updateConversation(session.id, newTitle)
->>>>>>> 593570a (Fix: Update, Delete of conv, refactored code)
                 }}
               />
             ))

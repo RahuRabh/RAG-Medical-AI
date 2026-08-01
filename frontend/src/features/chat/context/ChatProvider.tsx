@@ -33,14 +33,10 @@ export type ChatContextType = {
   openSession: (sessionId: string) => Promise<void>;
   sendMessage: (textContent: string) => Promise<void>;
   deleteConversation: (messageId: string | null) => Promise<void>;
-<<<<<<< HEAD
-  updateConversation: (conversationId: string | null, newTitle: string | null) => Promise<void>;
-=======
   updateConversation: (
     conversationId: string | null,
     newTitle: string | null,
   ) => Promise<void>;
->>>>>>> 593570a (Fix: Update, Delete of conv, refactored code)
 };
 
 export const ChatContext = createContext<ChatContextType | null>(null);
@@ -172,11 +168,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteConversation = async (messageId: typeof conversationId) => {
-<<<<<<< HEAD
-    setIsLoading(true);
-=======
     if (!messageId) return;
->>>>>>> 593570a (Fix: Update, Delete of conv, refactored code)
     setError("");
     try {
       await deleteConversationById(messageId);
@@ -205,20 +197,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       console.error("Failed to rename conversation", requestError);
       toast.error("Could not rename the conversation. Please try again.");
       setError("Could not rename the conversation. Please try again.");
-    }
-  };
-
-  const updateConversation = async (conversationId: string | null, newTitle: string | null) => {
-    setIsLoading(true);
-    setError("");
-    try {
-      await UpdateConversationById(conversationId, newTitle);
-      await refreshSessions();
-    } catch (requestError) {
-      console.error("Failed to rename conversation", requestError);
-      setError("Could not rename the conversation. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
