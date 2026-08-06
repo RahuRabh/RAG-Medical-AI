@@ -1,6 +1,6 @@
 import re
 from typing import Dict, Any, Optional
-from models.request import AIRequest
+from app.models.request import AIRequest
 # Converted regex patterns using Python's 're' module flags
 FOLLOW_UP_PATTERNS = [
     re.compile(r"^what about\b", re.IGNORECASE),

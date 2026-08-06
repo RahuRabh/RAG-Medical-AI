@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import Field
-from .shared import BaseCamelModel, StructuredContext, ConversationContext
+
+from app.models.shared import BaseCamelModel, StructuredContext, ConversationContext
 
 class AIRequest(BaseCamelModel):
     message: str = Field(..., min_length=1, description="The incoming chat message string")

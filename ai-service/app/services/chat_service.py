@@ -1,5 +1,7 @@
-from models.request import AIRequest
-from .understand_query import understand_query
+from app.models.request import AIRequest
+from app.services.understand_query import understand_query
+from app.services.expand_query import expand_query
+from app.services.retrieve_sources import retrieve_sources
 
 async def process_chat_request(request: AIRequest):
 
@@ -10,14 +12,23 @@ async def process_chat_request(request: AIRequest):
     
     conversation_ctx_dict = request.conversation_context.model_dump()
 
-    query_analysis = await understand_query(
+    understood_query = await understand_query(
         message=request.message,
         structured_context=structured_ctx_dict,
         conversation_context=conversation_ctx_dict
     )
 
+    expanded_query = await expand_query(understood_query)
+
+    retrieval = await retrieve_sources(
+        expanded_query,
+        understood_query
+    )
+
     return {
         "status": "success",
-        "extracted_context": query_analysis,
+        "extracted_context": understood_query,
+        "expanded_query": expanded_query,
         "original_message": request.message,
+        "retrieval": retrieval
     }
