@@ -3,6 +3,7 @@ from app.services.understand_query import understand_query
 from app.services.expand_query import expand_query
 from app.services.retrieve_sources import retrieve_sources
 from app.services.semantic import add_semantic_scores
+from app.services.rank_sources import rank_sources
 
 async def process_chat_request(request: AIRequest):
 
@@ -30,11 +31,19 @@ async def process_chat_request(request: AIRequest):
         retrieval["candidates"] , 
         understood_query)
 
+    ranking_result = rank_sources(
+        candidates=semantic_candidates,
+        understood_query=understood_query,
+        selected_limit=30
+    )
+    
+
     return {
         "status": "success",
         "extracted_context": understood_query,
         "expanded_query": expanded_query,
         "original_message": request.message,
         # "retrieval": retrieval,
-        "semantic_candidates": semantic_candidates
+        # "semantic_candidates": semantic_candidates
+        "ranking_result": ranking_result,
     }
