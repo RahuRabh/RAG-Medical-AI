@@ -6,3 +6,33 @@ backend/node_modules
 frontend/.env
 frontend/dist
 frontend/node_modules
+
+# ==========================================
+# Python & AI Service
+# ==========================================
+
+# Virtual Environments
+ai-service/.venv/
+ai-service/venv/
+ai-service/env/
+
+# Environment Variables
+ai-service/.env
+
+# Byte-compiled / Python Cache
+ai-service/**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest & Coverage Caches
+ai-service/.pytest_cache/
+ai-service/.coverage
+ai-service/htmlcov/
+
+# HuggingFace & SentenceTransformers Cache (Downloaded Models)
+ai-service/.cache/
+ai-service/models_cache/
+
+# IDE / Editor Settings
+.vscode/
+.idea/

@@ -2,6 +2,7 @@ from app.models.request import AIRequest
 from app.services.understand_query import understand_query
 from app.services.expand_query import expand_query
 from app.services.retrieve_sources import retrieve_sources
+from app.services.semantic import add_semantic_scores
 
 async def process_chat_request(request: AIRequest):
 
@@ -25,10 +26,15 @@ async def process_chat_request(request: AIRequest):
         understood_query
     )
 
+    semantic_candidates = await add_semantic_scores(
+        retrieval["candidates"] , 
+        understood_query)
+
     return {
         "status": "success",
         "extracted_context": understood_query,
         "expanded_query": expanded_query,
         "original_message": request.message,
-        "retrieval": retrieval
+        # "retrieval": retrieval,
+        "semantic_candidates": semantic_candidates
     }

@@ -6,6 +6,8 @@ from app.helper.clinicaltrials import fetch_clinical_trials_sources
 from app.helper.openalex import fetch_open_alex_sources
 from app.helper.pubmed import fetch_pub_med_sources
 
+from app.models.respond import RetrievalResult, RetrievalStats
+
 def normalize_key(source: dict) -> str:
     trial_id = source.get("trial", {}).get("nctId")
     if trial_id:
@@ -48,7 +50,7 @@ async def settle_source(name: str, coro) -> dict[str, Any]:
 async def retrieve_sources(
         expanded_query: dict[str, Any],
         understood_query: dict[str, Any]
-) -> dict[str, Any]:
+) -> RetrievalResult:
     open_alex_res, pub_med_res, clinical_trials_res = await asyncio.gather(
         settle_source(
             "OpenAlex",
@@ -94,6 +96,6 @@ async def retrieve_sources(
     }
 
     return {
-        "candidates": deduped[:10],
-        "stats": stats,
+        "candidates": deduped,
+        "stats": RetrievalStats(**stats),
     }
