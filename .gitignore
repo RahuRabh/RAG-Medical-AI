@@ -15,6 +15,8 @@ frontend/node_modules
 ai-service/.venv/
 ai-service/venv/
 ai-service/env/
+ai-service/app/.venv/
+ai-service/**/.venv
 
 # Environment Variables
 ai-service/.env
