@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import math
+import asyncio
 from typing import Any
 
-from app.helper.debug import debug_log
 from app.helper.embedding import get_embedding
 from app.helper.similarity import cosine_similarity
 
@@ -11,7 +11,7 @@ async def add_semantic_scores(
         candidates: list[dict[str, Any]],
         understood_query: dict[str, Any]
 ) -> list[dict[str, Any]]:
-    """d"""
+    
     query_text = (
         understood_query.get("normalizedQuery")
         or " ".join(
@@ -32,35 +32,27 @@ async def add_semantic_scores(
 
     query_embedding = await get_embedding(query_text)
 
-    updated: list[dict[str, Any]] = []
+    #1. Prepare texts for all candidates
+    source_texts = [
+        " ".join(filter(None, [c.get("title"), c.get("abstract"), c.get("supportingSnippet")])).strip()
+        for c in candidates
+    ]
 
-    for source in candidates:
-        source_text = " ".join(
-            filter(
-                None,
-                [
-                    source.get("title"),
-                    source.get("abstract"),
-                    source.get("supportingSnippet"),
-                ],
-            )
-        ).strip()
+    # 2. Fetch ALL candidate embeddings asynchronously in parallel!
+    source_embeddings = await asyncio.gather(
+        *[get_embedding(text) for text in source_texts],
+        return_exceptions=True
+    )
 
-        if not source_text:
-            updated.append({**source, "semanticScore": 0.0})
-            continue
-
-        source_embedding = await get_embedding(source_text)
-
-        if not source_embedding:
-            updated.append({**source, "semanticScore": 0.0})
-            continue
-
-        score = cosine_similarity(query_embedding, source_embedding)
-
-        if not math.isfinite(score):
+    # 3. Calculate scores
+    updated = []
+    for source, source_emb in zip(candidates, source_embeddings):
+        if isinstance(source_emb, Exception) or not source_emb:
             score = 0.0
+        else:
+            score = cosine_similarity(query_embedding, source_emb)
 
         updated.append({**source, "semanticScore": round(score, 4)})
 
+    updated.sort(key=lambda item: item.get("semanticScore", 0.0), reverse=True)
     return updated

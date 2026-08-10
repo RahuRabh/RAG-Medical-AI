@@ -2,9 +2,8 @@ fastapi
 uvicorn[standard]
 httpx
 xmltodict
-sentence-transformers
 numpy
-torch
 groq
 python-dotenv
 pydantic
+huggingface_hub
