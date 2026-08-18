@@ -1,5 +1,8 @@
 import asyncio
 import re
+import json
+import os
+
 from typing import Any
 
 from app.helper.clinicaltrials import fetch_clinical_trials_sources
@@ -7,6 +10,13 @@ from app.helper.openalex import fetch_open_alex_sources
 from app.helper.pubmed import fetch_pub_med_sources
 
 from app.models.respond import RetrievalResult, RetrievalStats
+
+from app.core.cache import build_retrieval_cache_key
+from app.core.redis import get_cache, set_cache
+
+RETRIEVAL_CACHE_TTL = int(
+    os.getenv("RETRIEVAL_CACHE_TTL", "86400")
+)
 
 def normalize_key(source: dict) -> str:
     trial_id = source.get("trial", {}).get("nctId")
@@ -51,6 +61,27 @@ async def retrieve_sources(
         expanded_query: dict[str, Any],
         understood_query: dict[str, Any]
 ) -> RetrievalResult:
+
+    print("🔥🔥🔥 ENTERED RETRIEVE SOURCES 🔥🔥🔥")
+    print("EXPANDED QUERY:", expanded_query)
+    print("UNDERSTOOD QUERY:", understood_query)
+
+    cache_key = build_retrieval_cache_key(
+        expanded_query,
+        understood_query,
+    )
+
+    try:
+        cached = await get_cache(cache_key)
+
+        if cached:
+            print("Retrieval cache HIT")
+            return json.loads(cached)
+    except Exception as error:
+        print(f"Retrieval cache read failed: {error}")
+
+    print("Retrieval cache MISS")
+
     open_alex_res, pub_med_res, clinical_trials_res = await asyncio.gather(
         settle_source(
             "OpenAlex",
@@ -95,7 +126,21 @@ async def retrieve_sources(
         "errors": errors
     }
 
-    return {
+    result = {
         "candidates": deduped,
-        "stats": RetrievalStats(**stats),
+        "stats": RetrievalStats(**stats).model_dump(),
     }
+
+    if not stats["errors"]:
+        try:
+            await set_cache(
+                cache_key,
+                json.dumps(result),
+                RETRIEVAL_CACHE_TTL,
+            )
+            print("Retrieval result cached")
+
+        except Exception as error:
+            print(f"Retrieval cache write failed: {error}")
+
+    return result
